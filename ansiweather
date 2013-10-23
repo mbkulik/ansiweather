@@ -52,8 +52,6 @@ data=$(get_config "data" || echo "\033[33;1m")
 delimiter=$(get_config "delimiter" || echo "\033[35m=>")
 dashes=$(get_config "dashes" || echo "\033[34m-")
 
-
-
 ###[ Unicode Symbols for icons ]###############################################
 
 sun=$(get_config "sun" || echo "\033[33;1m\xe2\x98\x80")
