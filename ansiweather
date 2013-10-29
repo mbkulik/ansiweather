@@ -6,7 +6,7 @@
 # https://github.com/fcambus/ansiweather                                      #
 #                                                                             #
 # Created: 2013/08/29                                                         #
-# Last Updated: 2013/10/19                                                    #
+# Last Updated: 2013/10/28                                                    #
 #                                                                             #
 # AnsiWeather is released under the BSD 3-Clause license.                     #
 # See LICENSE file for details.                                               #
@@ -16,6 +16,8 @@
 
 
 ###[ Configuration options ]###################################################
+
+LC_NUMERIC=C
 
 config_file=~/.ansiweatherrc
 
@@ -68,8 +70,20 @@ sun=$(get_config "sun" || echo "\033[33;1m\xe2\x98\x80")
 moon=$(get_config "moon" || echo "\033[36m\xe2\x98\xbd")
 clouds=$(get_config "clouds" || echo "\033[37;1m\xe2\x98\x81")
 rain=$(get_config "rain" || echo "\xe2\x98\x94")
-fog=$(get_config "fog" || echo "\xe2\x96\x92")
+fog=$(get_config "fog" || echo "\033[37;1m\xe2\x96\x92")
+snow=$(get_config "snow" || echo "\033[37;1m\xe2\x9d\x84")
+thunderstorm=$(get_config "thunderstorm" || echo "\xe2\x9a\xa1")
 
+
+
+###[ Check if jq is installed ]###############################################
+
+jqpath="`which jq`"
+if [ "$jqpath" == "" ]
+then 
+	echo -e "\njq binary is not found, please download it from http://stedolan.github.io/jq/ and put it in your PATH"
+	exit 255
+fi 
 
 
 ###[ Fetch Weather data ]######################################################
@@ -90,6 +104,16 @@ sky=$(echo $weather | jq -r '.weather[0].main')
 sunrise=$(echo $weather | jq '.sys.sunrise')
 sunset=$(echo $weather | jq '.sys.sunset')
 wind=$(echo $weather | jq '.wind.speed')
+azimuth=$(echo $weather | jq '.wind.deg')
+
+
+
+###[ Process Wind data ]#######################################################
+
+declare -a directions
+directions=(N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW)
+
+direction=${directions[$(echo "($azimuth + 11.25)/22.5 % 16" | bc)]}
 
 
 
@@ -145,7 +169,13 @@ then
 			icon="$rain  "
 			;;
 		Fog)
-			icon="$fog  "
+			icon="$fog "
+			;;
+		Snow)
+			icon="$snow "
+			;;
+		Thunderstorm)
+			icon="$thunderstorm  "
 			;;
 	esac
 fi
@@ -154,4 +184,4 @@ fi
 
 ###[ Display current Weather ]#################################################
 
-echo -e "$background$text Current weather in $city $delimiter$data $temperature $scale $icon$dashes$text Humidity $delimiter$data $humidity % $dashes$text Wind $delimiter$data $wind $speed_unit $dashes$text Pressure $delimiter$data $pressure $pressureUnit \033[0m"
+echo -e "$background$text Current weather in $city $delimiter$data $temperature $scale $icon$dashes$text Wind $delimiter$data $wind $speed_unit $direction $dashes$text Humidity $delimiter$data $humidity % $dashes$text Pressure $delimiter$data $pressure $pressureUnit \033[0m"
