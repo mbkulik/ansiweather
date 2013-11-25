@@ -140,14 +140,32 @@ fetch_cmd=$(get_config "fetch_cmd" || echo "curl -s")
 api_cmd=$([[ $forecast != 0 ]] && echo "forecast/daily" || echo "weather")
 weather=$($fetch_cmd "http://api.openweathermap.org/data/2.5/$api_cmd?q=$location\&units=$units")
 
+if [ -z "$weather" ]
+then
+	echo "ERROR : Cannot fetch weather data"
+	exit
+fi
+
+status_code=$(echo $weather | jq -r '.cod')
+
+if [ $status_code != 200 ]
+then
+	echo "ERROR : Cannot fetch weather data for the given location"
+	exit
+fi
+
+
+
 ###[ Process Weather data ]####################################################
 
 function epoch_to_date {
 	unamestr=$(uname)
-	if [[ "$unamestr" == 'Linux' ]]; then
-		ret=$(date -d @$1 +"%a %b %d")
-	else 
+	if date -j -r $1 +"%a %b %d" > /dev/null 2>&1; then
+		# BSD
 		ret=$(date -j -r $1 +"%a %b %d")
+	else
+		# GNU
+		ret=$(date -d @$1 +"%a %b %d")
 	fi
 	echo $ret
 }
@@ -208,7 +226,10 @@ if [ $forecast != 0 ]
 then
 	period="none"
 else
-	if [ $now -ge $sunset ] || [ $now -le $sunrise ]
+	if [ -z "$sunset" ] || [ -z "$sunrise" ]
+	then
+		period="day"
+	elif [ $now -ge $sunset ] || [ $now -le $sunrise ]
 	then
 		period="night"
 	else
