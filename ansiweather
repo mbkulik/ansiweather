@@ -77,7 +77,7 @@ function auto_locate {
 # Location : example "Moscow,RU"
 location=$(get_config "location" || auto_locate || echo "Moscow,RU")
 
-#check and replace spaces for curl requests
+# check and replace spaces for curl requests
 location=$( printf "%s\n" "$location" | sed 's/ /%20/g' )
 
 # System of Units : "metric" or "imperial"
@@ -129,6 +129,8 @@ moon=$(get_config "moon" || echo "\033[36m\xe2\x98\xbd")
 clouds=$(get_config "clouds" || echo "\033[37;1m\xe2\x98\x81")
 rain=$(get_config "rain" || echo "\xe2\x98\x94")
 fog=$(get_config "fog" || echo "\033[37;1m\xe2\x96\x92")
+mist=$(get_config "mist" || echo "\033[34m\xe2\x96\x91")
+haze=$(get_config "haze" || echo "\033[33m\xe2\x96\x91")
 snow=$(get_config "snow" || echo "\033[37;1m\xe2\x9d\x84")
 thunderstorm=$(get_config "thunderstorm" || echo "\xe2\x9a\xa1")
 
@@ -136,7 +138,6 @@ thunderstorm=$(get_config "thunderstorm" || echo "\xe2\x9a\xa1")
 
 ###[ Fetch Weather data ]######################################################
 
-fetch_cmd=$(get_config "fetch_cmd" || echo "curl -s")
 api_cmd=$([[ $forecast != 0 ]] && echo "forecast/daily" || echo "weather")
 weather=$($fetch_cmd "http://api.openweathermap.org/data/2.5/$api_cmd?q=$location&units=$units")
 
@@ -159,7 +160,6 @@ fi
 ###[ Process Weather data ]####################################################
 
 function epoch_to_date {
-	unamestr=$(uname)
 	if date -j -r $1 +"%a %b %d" > /dev/null 2>&1; then
 		# BSD
 		ret=$(date -j -r $1 +"%a %b %d")
@@ -278,6 +278,12 @@ function get_icon {
 			;;
 		Fog)
 			echo "$fog "
+			;;
+		Mist)
+			echo "$mist "
+			;;
+		Haze)
+			echo "$haze "
 			;;
 		Snow)
 			echo "$snow "
