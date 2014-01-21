@@ -14,7 +14,8 @@ Weather data comes from the `OpenWeatherMap` free weather API.
 AnsiWeather requires the following dependencies : 
 
 - A command to fetch HTTP data such as [cURL](http://curl.haxx.se) or [wget](https://www.gnu.org/software/wget/)
-- jq (lightweight and flexible command-line JSON processor) : http://stedolan.github.io/jq/
+- [jq](http://stedolan.github.io/jq/) (lightweight and flexible command-line JSON processor)
+- [bc](https://www.gnu.org/software/bc/) (arbitrary precision numeric processing language)
 
 
 
@@ -30,7 +31,7 @@ After cloning the repository, simply invoke the script by typing :
 
 Any configuration options may also be passed in as command line options.
 
-	./ansiweather -l Moscow,RU -u metric -s true -f 5
+	./ansiweather -l Moscow,RU -u metric -s true -f 5 -d true
 
 
 
@@ -46,6 +47,7 @@ Example : `~/.ansiweatherrc`
 	location:Moscow,RU
 	fetch_cmd:ftp -V -o -
 	units:metric
+	daylight:true
 
 ### Location
 
@@ -99,7 +101,15 @@ Show upcoming forecast for the next `N` days (for 0 <= N <= 7). `0` will show st
 
 	forecast:5
 
+Default: `0`
 
+### Display sunrise / sunset
+
+Toggle daylight display. Value can be either `true` or `false`.
+
+	daylight:false
+
+Default: `false`
 
 ## License
 
